@@ -2,6 +2,41 @@
 
 ## Unreleased
 
+## 1.0.0-alpha.9 - 2026-05-18
+
+Alpha 9 is the **CI / supply-chain hardening + voice-frontend maturation**
+release. It absorbs every change that landed on `main` between the
+`v1.0.0-alpha.5` tag and today — the never-tagged narrative milestones
+referenced as "alpha.6" (GPU contention / LLM warmup fixes), "alpha.7"
+(DeepFilterNet capture, half-duplex post-TTS gate, first-reply latency
+banner) and "alpha.8" (LLM backend abstraction, telegram voice, voice
+optional) all roll up here.
+
+Headlines:
+
+- **Verified voice cycle**: ~4 s first reply (285 ms STT + 3679 ms LLM →
+  first audio) on Orin Nano + LyraT V4.3 + Phi-4-mini Q4_K_M, with a
+  first-reply latency banner that prints the 5-phase breakdown so
+  regressions are visible at a glance.
+- **LLM backend is now a config-driven facade** (#32, #35, #38, #39, #40,
+  #43) — `[llm.backend]` selects `llama-cpp` or `genie-ai-runtime`. The
+  v1.0.0 `genie-ai-runtime` install pipeline ships in #56; the default
+  flip is tracked in #52.
+- **Voice is now an opt-out Cargo feature** (#41, #57). Default builds
+  are byte-identical for Jetson; `--no-default-features` produces a
+  chat-only binary that compiles on macOS / Windows without ALSA.
+- **Telegram voice ingestion** (#42, #53) — bot users can send voice
+  notes and get a spoken (or text) reply on the same conversation
+  path as the mic-array loop.
+- **CI pipeline** (#34): fmt + clippy + test (#37), aarch64 Jetson
+  cross-compile (#49), cargo-audit + cargo-deny supply-chain (#50),
+  shellcheck + ruff for shell/Python (#51). All green on `main`.
+- **Opt-in Qwen3-4B** (#44, #46) alongside today's Phi-4-mini default;
+  recommended pairing is Qwen3-4B + `genie-ai-runtime`.
+
+Workspace version bumped `1.0.0-alpha.5` → `1.0.0-alpha.9` across all
+seven workspace crates.
+
 ### Added
 
 - `.github/workflows/audit.yml` and `deny.toml` — supply-chain audit

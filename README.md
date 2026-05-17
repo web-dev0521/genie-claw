@@ -15,11 +15,14 @@ Voice in, voice out, controls Home Assistant, no cloud.**
 
 ![GenieClaw](doc/assets/genie-claw.png)
 
-> **Status:** `v1.0.0-alpha.4`. The voice loop, the Home Assistant integration,
-> and the safety/audit surfaces are working end-to-end on Jetson Orin Nano Super
-> 8 GB (see [`CHANGELOG.md`](CHANGELOG.md) for the alpha.5 verified-deploy notes
-> and the alpha.7 verified voice cycle). Setup is currently a 30-60 min Jetson
-> bring-up, not a one-line install — see [`GETTING_STARTED.md`](GETTING_STARTED.md).
+> **Status:** `v1.0.0-alpha.9`. The voice loop, the Home Assistant integration,
+> the LLM-backend facade (llama.cpp / genie-ai-runtime), Telegram voice
+> ingestion, and the safety/audit surfaces are working end-to-end on Jetson
+> Orin Nano Super 8 GB (see [`CHANGELOG.md`](CHANGELOG.md) for the alpha.5
+> verified-deploy notes, the alpha.7 verified voice cycle, and the alpha.9
+> CI / supply-chain / voice-optional bundle). Setup is currently a 30-60 min
+> Jetson bring-up, not a one-line install — see
+> [`GETTING_STARTED.md`](GETTING_STARTED.md).
 
 ## How it works
 
