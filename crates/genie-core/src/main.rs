@@ -170,13 +170,25 @@ async fn main() -> Result<()> {
     let voice_requested = std::env::args().any(|a| a == "--voice")
         || std::env::var("GENIEPOD_VOICE").unwrap_or_default() == "1"
         || config.core.voice_enabled;
+    let wakeword_available =
+        !config.core.wakeword_script.as_os_str().is_empty() && config.core.wakeword_script.exists();
+    let startup_decision =
+        runtime_mode::decide_startup_mode(voice_requested, interactive, wakeword_available);
 
     // Whether the running binary actually has the voice subsystem compiled in.
     // When voice was requested but the binary is chat-only (issue #41 feature
     // gate), emit one warning and fall through to the chat path so an existing
     // voice-tagged `geniepod.toml` still deploys cleanly on a chat-only build.
     #[cfg(feature = "voice")]
-    let voice_mode = voice_requested;
+    let voice_mode = {
+        if startup_decision.blocked_push_to_talk() {
+            tracing::warn!(
+                "push-to-talk voice mode requested without an interactive terminal and no wakeword script is available; \
+                 running HTTP API only"
+            );
+        }
+        startup_decision.enters_voice()
+    };
     #[cfg(not(feature = "voice"))]
     let voice_mode = {
         if voice_requested {
@@ -187,6 +199,7 @@ async fn main() -> Result<()> {
                  enable the voice loop."
             );
         }
+        let _ = startup_decision;
         false
     };
 
