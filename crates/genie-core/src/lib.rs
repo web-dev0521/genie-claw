@@ -49,6 +49,7 @@ pub mod memory;
 pub mod ota;
 pub mod profile;
 pub mod prompt;
+pub mod prompt_sha;
 pub mod reasoning;
 pub mod repl;
 pub mod runtime_contract;

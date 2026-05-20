@@ -228,6 +228,7 @@ agent operation:
 
 - runtime contract fingerprints for prompt, tools, policy, and hydrated state
 - optional contract drift detection after a known-good boot
+- system-prompt SHA-256 (logged at boot, surfaced in `/api/health` and `genie-ctl status`) to prove deterministic prompt assembly across restarts
 - privacy-preserving tool audit logs
 - redacted `/api/security` posture for dashboard/support use instead of raw TOML exposure
 - origin-aware tool allow/deny policy

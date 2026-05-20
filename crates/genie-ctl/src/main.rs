@@ -811,6 +811,11 @@ async fn cmd_status() -> Result<()> {
                     provider
                 );
             }
+            // System-prompt SHA (issue #110): same config + hydrated state must
+            // produce an identical digest across a full-stack restart.
+            if let Some(sha) = data.get("system_prompt_sha").and_then(|v| v.as_str()) {
+                println!("Prompt:    {}", sha);
+            }
         }
         Err(_) => println!("Core:      offline"),
     }

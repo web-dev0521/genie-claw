@@ -67,6 +67,9 @@ pub struct ChatServer {
     current_conv_id: Mutex<String>,
     chat_turn_lock: Mutex<()>,
     system_prompt: String,
+    /// SHA-256 of the boot-assembled system prompt (issue #110). Computed once
+    /// at startup and served via /api/health for restart-determinism checks.
+    system_prompt_sha: String,
     max_history: usize,
     model_family: ModelFamily,
     expected_runtime_contract_hash: String,
@@ -86,6 +89,7 @@ impl ChatServer {
         memory: Memory,
         conversations: ConversationStore,
         system_prompt: String,
+        system_prompt_sha: String,
         max_history: usize,
         model_family: ModelFamily,
         expected_runtime_contract_hash: String,
@@ -103,6 +107,7 @@ impl ChatServer {
             current_conv_id: Mutex::new(conv_id),
             chat_turn_lock: Mutex::new(()),
             system_prompt,
+            system_prompt_sha,
             max_history,
             model_family,
             expected_runtime_contract_hash,
@@ -233,6 +238,7 @@ async fn handle_request(stream: tokio::net::TcpStream, ctx: &ChatServer) -> Resu
     let current_conv_id = &ctx.current_conv_id;
     let chat_turn_lock = &ctx.chat_turn_lock;
     let system_prompt = &ctx.system_prompt;
+    let system_prompt_sha = &ctx.system_prompt_sha;
     let max_history = ctx.max_history;
     let model_family = ctx.model_family;
     let expected_runtime_contract_hash = &ctx.expected_runtime_contract_hash;
@@ -346,6 +352,7 @@ async fn handle_request(stream: tokio::net::TcpStream, ctx: &ChatServer) -> Resu
                 memory,
                 conversations,
                 system_prompt,
+                system_prompt_sha,
                 max_history,
                 model_family,
                 expected_runtime_contract_hash,
@@ -1038,6 +1045,7 @@ async fn handle_health(
     memory: &Memory,
     conversations: &ConversationStore,
     system_prompt: &str,
+    system_prompt_sha: &str,
     max_history: usize,
     model_family: ModelFamily,
     expected_runtime_contract_hash: &str,
@@ -1070,6 +1078,7 @@ async fn handle_health(
         "mem_available_mb": mem_avail,
         "connectivity": connectivity_health,
         "web_search": tools.web_search_status(),
+        "system_prompt_sha": system_prompt_sha,
         "runtime_contract": runtime_contract,
         "version": env!("CARGO_PKG_VERSION"),
     });
@@ -1945,6 +1954,7 @@ mod tests {
         let memory = Memory::open(&memory_path).unwrap();
         let conversations = ConversationStore::open(&conversations_path).unwrap();
 
+        let prompt_sha = crate::prompt_sha::sha256_hex("system prompt");
         let (status, _, body) = handle_health(
             &llm,
             &tools,
@@ -1952,6 +1962,7 @@ mod tests {
             &memory,
             &conversations,
             "system prompt",
+            &prompt_sha,
             12,
             ModelFamily::Phi,
             "",
@@ -1962,6 +1973,8 @@ mod tests {
         let parsed: serde_json::Value = serde_json::from_str(&body).unwrap();
         assert_eq!(parsed["llm"], "offline");
         assert_eq!(parsed["llm_backend"], "genie-ai-runtime");
+        assert_eq!(parsed["system_prompt_sha"], prompt_sha);
+        assert_eq!(parsed["system_prompt_sha"].as_str().unwrap().len(), 64);
 
         let _ = std::fs::remove_file(&memory_path);
         let _ = std::fs::remove_file(&conversations_path);

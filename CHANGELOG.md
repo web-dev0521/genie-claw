@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+- **System-prompt SHA** (#110): the fully-assembled system prompt (persona,
+  tools, and hydrated household memory) is now fingerprinted with a real
+  SHA-256 at boot, satisfying the M1 exit criterion that the prompt stays
+  deterministic across a full-stack restart. New pure-Rust `prompt_sha`
+  module (no crypto dependency, pinned to the FIPS-180 known-answer vectors)
+  computes the digest; genie-core logs it during boot, exposes it as
+  `system_prompt_sha` on `/api/health`, and `genie-ctl status` prints it as
+  `Prompt:`. A new `prompt_sha_test` integration test boots the prompt
+  assembly twice from identical config + hydrated state and asserts an
+  identical SHA, plus asserts that a prompt-assembly or hydration change
+  shifts the digest — so silent prompt drift between runs becomes a visible
+  hash mismatch instead of an undetected behavior change.
 - **Real streaming TTS** (#26): the voice loop now detects sentence
   boundaries inside the LLM streaming callback and forwards completed
   sentences to a concurrent TTS task immediately, instead of waiting
