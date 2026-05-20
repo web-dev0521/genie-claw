@@ -611,7 +611,16 @@ async fn handle_chat_stream(
         Ok::<StreamState, anyhow::Error>(state)
     };
 
-    let (llm_result, state_result) = tokio::join!(producer, consumer);
+    tokio::pin!(producer);
+    tokio::pin!(consumer);
+    // biased: arm 1 is always polled first. If producer is pending, tx is still
+    // alive, so consumer can only exit via a write error (disconnect), not via a
+    // spurious rx-None race that would produce a false "stream cancelled" error.
+    let (llm_result, state_result) = tokio::select! {
+        biased;
+        llm_r = &mut producer => (llm_r, consumer.await),
+        state_r = &mut consumer => (Err(anyhow::anyhow!("LLM stream cancelled")), state_r),
+    };
     let mut state = state_result?;
     let llm_response = llm_result?;
 
