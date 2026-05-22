@@ -104,12 +104,7 @@ pub fn validate_limited_context_agent(
 }
 
 pub fn estimate_tokens(text: &str) -> usize {
-    let bytes = text.len();
-    if bytes == 0 {
-        0
-    } else {
-        (bytes + 3) / 4
-    }
+    text.len().div_ceil(4)
 }
 
 #[cfg(test)]

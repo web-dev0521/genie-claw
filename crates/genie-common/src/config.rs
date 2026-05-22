@@ -1336,8 +1336,16 @@ home_runtime_boundary = "external_runtime"
             config.optional_ai_provider.provider,
             OptionalAiProviderKind::OpenAiCompatible
         );
-        assert!(config.optional_ai_provider.limited_context_compatible(&config.agent));
-        assert!(!config.optional_ai_provider.production_candidate(&config.agent));
+        assert!(
+            config
+                .optional_ai_provider
+                .limited_context_compatible(&config.agent)
+        );
+        assert!(
+            !config
+                .optional_ai_provider
+                .production_candidate(&config.agent)
+        );
     }
 
     #[test]

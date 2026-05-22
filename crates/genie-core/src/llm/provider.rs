@@ -5,9 +5,7 @@
 //! wired behind the existing LLM facade without violating the limited-context
 //! agent contract.
 
-use genie_common::config::{
-    AgentConfig, OptionalAiProviderConfig, OptionalAiProviderKind,
-};
+use genie_common::config::{AgentConfig, OptionalAiProviderConfig, OptionalAiProviderKind};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ProviderReadiness {
@@ -89,9 +87,7 @@ mod tests {
 
     #[test]
     fn disabled_provider_has_no_plan() {
-        assert!(
-            OptionalProviderPlan::from_config(&OptionalAiProviderConfig::default()).is_none()
-        );
+        assert!(OptionalProviderPlan::from_config(&OptionalAiProviderConfig::default()).is_none());
     }
 
     #[test]
@@ -127,6 +123,9 @@ mod tests {
         };
         let plan = OptionalProviderPlan::from_config(&provider).unwrap();
 
-        assert_eq!(plan.readiness(&AgentConfig::default()), ProviderReadiness::Ready);
+        assert_eq!(
+            plan.readiness(&AgentConfig::default()),
+            ProviderReadiness::Ready
+        );
     }
 }
