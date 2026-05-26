@@ -58,6 +58,9 @@ pub async fn run(
             continue;
         }
 
+        // Security: scan for prompt injection (issue #196).
+        crate::security::injection::scan_and_warn(text, crate::security::injection::source::REPL);
+
         // Persist user message.
         let _ = conversations.append(&conv_id, "user", text, None);
 
