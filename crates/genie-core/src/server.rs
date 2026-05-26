@@ -2042,10 +2042,8 @@ mod tests {
                 source: &mut source,
                 is_injection: &mut is_injection,
             });
-            if is_injection {
-                if let Some(src) = source {
-                    self.sources.lock().unwrap().push(src);
-                }
+            if let Some(src) = source.filter(|_| is_injection) {
+                self.sources.lock().unwrap().push(src);
             }
         }
     }
